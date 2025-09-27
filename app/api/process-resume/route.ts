@@ -48,11 +48,13 @@ export async function POST(req: NextRequest) {
     // Connect to database and save/update user profile
     await dbConnect();
 
-    const userProfile = await (UserProfile as any).findOneAndUpdate(
+    // @ts-ignore - Mongoose typing issue
+    const userProfile = await UserProfile.findOneAndUpdate(
       { userId },
       {
         resumeUrl: fileUrl,
         resumeSummary,
+        fileName,
       },
       { upsert: true, new: true }
     );

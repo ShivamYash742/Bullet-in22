@@ -59,6 +59,7 @@ Interview Duration: ${interviewContext.duration || "3 minutes"}`
 CONVERSATION HISTORY:
 ${
   conversationHistory
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ?.map((msg: any) => `${msg.sender}: ${msg.text}`)
     .join("\n") || "No previous conversation"
 }
@@ -84,6 +85,7 @@ Respond ONLY with your interviewer response, no additional formatting or labels.
       success: true,
       response: result.text.trim(),
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error generating AI response:", error);
 

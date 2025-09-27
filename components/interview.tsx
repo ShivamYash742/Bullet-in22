@@ -90,7 +90,7 @@ const Interview = ({
   role: string;
   mentorId: string;
 }) => {
-  const { initAvatar, startAvatar, stopAvatar, sessionState, stream, avatarRef } =
+  const { initAvatar, startAvatar, stopAvatar, sessionState, stream } =
     useStreamingAvatarSession();
   const { startVoiceChat } = useVoiceChat();
   const { sendMessage: speakMessage } = useTextChat();
@@ -111,7 +111,7 @@ const Interview = ({
   const [message, setMessage] = useState('');
   const [isInterviewComplete, setIsInterviewComplete] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [lastSpeechTime, setLastSpeechTime] = useState<number>(Date.now());
+  // const [lastSpeechTime, setLastSpeechTime] = useState<number>(Date.now());
   const [speechStartTime, setSpeechStartTime] = useState<number | null>(null);
   const [pauseStartTime, setPauseStartTime] = useState<number | null>(null);
   const [conversationMetrics, setConversationMetrics] = useState({
@@ -182,6 +182,7 @@ const Interview = ({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSessionMetrics = async (metrics: any) => {
     if (!sessionId) return;
 
@@ -392,12 +393,14 @@ const Interview = ({
 
   // Function to get mentor name by ID
   // Handle real-time user speech messages
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   const handleUserSpeechMessage = (detail: any) => {
     console.log('User speech message:', detail);
     // You can use this for real-time transcription display if needed
   };
 
   // Handle complete user message and generate AI response
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   const handleUserMessageComplete = async (detail: any) => {
     console.log('User message complete:', detail);
     

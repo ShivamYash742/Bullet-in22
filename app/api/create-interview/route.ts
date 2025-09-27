@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/mongodb';
@@ -59,7 +57,8 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     // Get user profile for resume summary
-    const userProfile = await (UserProfile.findOne({ userId }) as any).exec();
+    // @ts-ignore - Mongoose typing issue
+    const userProfile = await UserProfile.findOne({ userId }).exec();
 
     if (!userProfile || !userProfile.resumeSummary) {
       return NextResponse.json(

@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/mongodb';
 import UserProfile from '@/lib/models/User';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth();
 
@@ -15,7 +15,8 @@ export async function GET() {
     await dbConnect();
 
     // Get user profile
-    const userProfile = await UserProfile.findOne({ userId });
+    // @ts-ignore - Mongoose typing issue
+    const userProfile = await UserProfile.findOne({ userId }).exec();
 
     return NextResponse.json({
       success: true,

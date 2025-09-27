@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { storage, BUCKET_ID } from '@/lib/appwrite';
-import { ID } from 'appwrite';
 import { createGroq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
 import dbConnect from '@/lib/mongodb';
 import UserProfile from '@/lib/models/User';
+import { storage, BUCKET_ID } from '@/lib/appwrite';
+import { ID } from 'appwrite';
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY || '',
@@ -14,7 +14,6 @@ const groq = createGroq({
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -51,7 +50,8 @@ export async function POST(req: NextRequest) {
     // Connect to database and save/update user profile
     await dbConnect();
 
-    const userProfile = await (UserProfile as any).findOneAndUpdate(
+    // @ts-ignore - Mongoose typing issue
+    const userProfile = await UserProfile.findOneAndUpdate(
       { userId },
       {
         resumeUrl: fileUrl.toString(),

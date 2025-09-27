@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createGroq } from '@ai-sdk/groq';
@@ -8,7 +6,7 @@ import dbConnect from '@/lib/mongodb';
 import InterviewSession from '@/lib/models/InterviewSession';
 import InterviewReport from '@/lib/models/InterviewReport';
 import Interview from '@/lib/models/Interview';
-import { mentors, STANDARD_MARKING_SCHEMA, getMentorById } from '@/components/mentors';
+import { STANDARD_MARKING_SCHEMA, getMentorById } from '@/components/mentors';
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY || '',
@@ -72,9 +70,9 @@ Return ONLY valid JSON, no additional text or formatting.`;
 }
 
 // Helper function to calculate metrics from messages if not provided
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function calculateMetricsFromMessages(messages: any[]) {
   const userMessages = messages.filter(msg => msg.sender === 'user');
-  const interviewerMessages = messages.filter(msg => msg.sender === 'interviewer');
   
   // Calculate basic metrics
   const totalMessages = messages.length;
@@ -257,10 +255,10 @@ IMPORTANT: Return ONLY valid JSON, no additional text or formatting.`;
     
     // Calculate weighted average using standard schema
     const avgScore = Math.round(
-      (communicationScore * markingSchema.communicationSkills.weight) +
-      (technicalScore * markingSchema.technicalKnowledge.weight) +
-      (problemSolvingScore * markingSchema.problemSolving.weight) +
-      (confidenceScore * markingSchema.confidence.weight)
+      (communicationScore * STANDARD_MARKING_SCHEMA.communicationSkills.weight) +
+      (technicalScore * STANDARD_MARKING_SCHEMA.technicalKnowledge.weight) +
+      (problemSolvingScore * STANDARD_MARKING_SCHEMA.problemSolving.weight) +
+      (confidenceScore * STANDARD_MARKING_SCHEMA.confidence.weight)
     );
 
     return {
@@ -268,32 +266,32 @@ IMPORTANT: Return ONLY valid JSON, no additional text or formatting.`;
         communicationSkills: {
           score: communicationScore,
           strengths: calculatedMetrics.fillerWordsCount < 5 ? 
-            markingSchema.communicationSkills.criteria.slice(0, 2) : 
+            STANDARD_MARKING_SCHEMA.communicationSkills.criteria.slice(0, 2) : 
             ['Understandable communication'],
           improvements: calculatedMetrics.fillerWordsCount >= 5 ? 
             ['Reduce filler words', 'Practice smoother delivery'] : 
             ['Add more specific examples'],
-          feedback: `Communication clarity was ${calculatedMetrics.fillerWordsCount < 5 ? 'excellent' : 'good'} with ${calculatedMetrics.fillerWordsCount} filler words detected. Scoring based on: ${markingSchema.communicationSkills.criteria.join(', ')}.`
+          feedback: `Communication clarity was ${calculatedMetrics.fillerWordsCount < 5 ? 'excellent' : 'good'} with ${calculatedMetrics.fillerWordsCount} filler words detected. Scoring based on: ${STANDARD_MARKING_SCHEMA.communicationSkills.criteria.join(', ')}.`
         },
         technicalKnowledge: {
           score: technicalScore,
           strengths: ['Relevant responses', 'Job-related knowledge'],
           improvements: ['Provide more technical depth', 'Use industry terminology'],
-          feedback: `Demonstrated understanding of the role requirements. Evaluation criteria: ${markingSchema.technicalKnowledge.criteria.join(', ')}.`
+          feedback: `Demonstrated understanding of the role requirements. Evaluation criteria: ${STANDARD_MARKING_SCHEMA.technicalKnowledge.criteria.join(', ')}.`
         },
         problemSolving: {
           score: problemSolvingScore,
           strengths: calculatedMetrics.averageResponseTime < 3000 ? 
-            markingSchema.problemSolving.criteria.slice(0, 2) : 
+            STANDARD_MARKING_SCHEMA.problemSolving.criteria.slice(0, 2) : 
             ['Thoughtful responses'],
           improvements: calculatedMetrics.averageResponseTime > 5000 ? 
             ['Reduce response time', 'Practice common scenarios'] : 
             ['Structure answers better'],
-          feedback: `Response timing averaged ${Math.round(calculatedMetrics.averageResponseTime / 1000)} seconds, showing ${calculatedMetrics.averageResponseTime < 3000 ? 'quick' : 'thoughtful'} processing. Assessed on: ${markingSchema.problemSolving.criteria.join(', ')}.`
+          feedback: `Response timing averaged ${Math.round(calculatedMetrics.averageResponseTime / 1000)} seconds, showing ${calculatedMetrics.averageResponseTime < 3000 ? 'quick' : 'thoughtful'} processing. Assessed on: ${STANDARD_MARKING_SCHEMA.problemSolving.criteria.join(', ')}.`
         },
         confidence: {
           score: confidenceScore,
-          analysis: `Confidence level was ${calculatedMetrics.confidenceScore > 0.8 ? 'high' : calculatedMetrics.confidenceScore > 0.6 ? 'moderate' : 'developing'} throughout the interview. Evaluated based on: ${markingSchema.confidence.criteria.join(', ')}.`,
+          analysis: `Confidence level was ${calculatedMetrics.confidenceScore > 0.8 ? 'high' : calculatedMetrics.confidenceScore > 0.6 ? 'moderate' : 'developing'} throughout the interview. Evaluated based on: ${STANDARD_MARKING_SCHEMA.confidence.criteria.join(', ')}.`,
           recommendations: calculatedMetrics.confidenceScore < 0.7 ? 
             ['Practice mock interviews', 'Work on reducing pauses'] : 
             ['Maintain current confidence level', 'Continue practicing']
@@ -362,8 +360,11 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     // Get interview and session data
+    // @ts-ignore - Mongoose typing issue
     const [interview, session] = await Promise.all([
+      // @ts-ignore - Mongoose typing issue
       Interview.findById(interviewId).exec(),
+      // @ts-ignore - Mongoose typing issue
       InterviewSession.findById(sessionId).exec()
     ]);
 
@@ -380,7 +381,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if report already exists
-    const existingReport = await (InterviewReport.findOne({ interviewId }) as any).exec();
+    // @ts-ignore - Mongoose typing issue
+    const existingReport = await InterviewReport.findOne({ interviewId }).exec();
     if (existingReport) {
       return NextResponse.json({
         success: true,
@@ -393,8 +395,8 @@ export async function POST(req: NextRequest) {
     const mentor = getMentorById(interview.mentorId);
     const mentorName = mentor ? mentor.name : 'AI Interviewer';
     
-    // Validate that all mentors use the same marking schema
-    const markingSchema = mentor?.markingSchema || STANDARD_MARKING_SCHEMA;
+    // Use standard marking schema for consistency
+    const markingSchema = STANDARD_MARKING_SCHEMA;
 
     // Generate AI analysis
     const aiAnalysis = await analyzeConversationWithAI(
@@ -456,14 +458,17 @@ export async function POST(req: NextRequest) {
     await report.save();
 
     // Update interview and session
+    // @ts-ignore - Mongoose typing issue
     await Promise.all([
-      (Interview.findByIdAndUpdate(interviewId, {
+      // @ts-ignore - Mongoose typing issue
+      Interview.findByIdAndUpdate(interviewId, {
         reportId: report._id,
         reportGenerated: true,
-      }) as any).exec(),
-      (InterviewSession.findByIdAndUpdate(sessionId, {
+      }).exec(),
+      // @ts-ignore - Mongoose typing issue
+      InterviewSession.findByIdAndUpdate(sessionId, {
         reportGenerated: true,
-      }) as any).exec()
+      }).exec()
     ]);
 
     return NextResponse.json({
@@ -504,9 +509,11 @@ export async function GET(req: NextRequest) {
 
     let report;
     if (reportId) {
-      report = await (InterviewReport.findById(reportId) as any).exec();
+      // @ts-ignore - Mongoose typing issue
+      report = await InterviewReport.findById(reportId).exec();
     } else {
-      report = await (InterviewReport.findOne({ interviewId }) as any).exec();
+      // @ts-ignore - Mongoose typing issue
+      report = await InterviewReport.findOne({ interviewId }).exec();
     }
 
     if (!report) {
