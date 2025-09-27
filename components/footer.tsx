@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { Twitter, Linkedin, Mail } from 'lucide-react';
 
 const Footer = React.forwardRef<
   HTMLDivElement,
@@ -31,34 +30,6 @@ const Footer = React.forwardRef<
             </Link>
           </nav>
 
-          {/* Social Media Links */}
-          <div className="flex items-center gap-3">
-            <a
-              href="https://x.com/vivekvt_"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300"
-              aria-label="Follow on X (Twitter)"
-            >
-              <Twitter size={18} />
-            </a>
-            <a
-              href="https://linkedin.com/in/vivekvt"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300"
-              aria-label="Connect on LinkedIn"
-            >
-              <Linkedin size={18} />
-            </a>
-            <a
-              href="mailto:contact@vivekthakur.dev"
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300"
-              aria-label="Send email"
-            >
-              <Mail size={18} />
-            </a>
-          </div>
         </div>
 
         {/* Bottom Border Line */}
