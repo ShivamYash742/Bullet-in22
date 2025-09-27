@@ -17,7 +17,8 @@ export async function GET(
 
     await dbConnect();
 
-    const interview = (await Interview.findById(id)) as IInterview | null;
+    // @ts-ignore - Mongoose typing issue
+    const interview = (await Interview.findById(id).exec()) as IInterview | null;
 
     if (!interview) {
       return NextResponse.json(
@@ -76,7 +77,8 @@ export async function PATCH(
 
     await dbConnect();
 
-    const interview = (await Interview.findById(id)) as IInterview | null;
+    // @ts-ignore - Mongoose typing issue
+    const interview = (await Interview.findById(id).exec()) as IInterview | null;
 
     if (!interview) {
       return NextResponse.json(
